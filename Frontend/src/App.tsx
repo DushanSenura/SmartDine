@@ -32,7 +32,7 @@ import PersonalSettingsPage from './pages/PersonalSettings/PersonalSettingsPage'
 import FoodServiceOrderPage from './pages/FoodServiceOrder/FoodServiceOrderPage';
 import logoImage from './assets/logo.png';
 
-type DashboardPageId = 'dashboard' | 'orders' | 'ordering' | 'kitchen' | 'booking' | 'spaces' | 'staff' | 'branch' | 'chashiar' | 'menu' | 'company-settings' | 'personal-settings';
+type DashboardPageId = 'dashboard' | 'orders' | 'ordering' | 'payment' | 'kitchen' | 'booking' | 'spaces' | 'staff' | 'branch' | 'chashiar' | 'menu' | 'company-settings' | 'personal-settings';
 type SidebarItem = {
   id: DashboardPageId;
   label: string;
@@ -51,6 +51,7 @@ const demoCredentials = [
 
 const hiddenPagesByRole: Partial<Record<DashboardPageId, Array<User['role']>>> = {
   ordering: ['kitchen'],
+  payment: ['waiter', 'kitchen', 'customer'],
   kitchen: ['waiter', 'cashier', 'customer'],
   booking: ['waiter', 'kitchen', 'customer'],
   spaces: ['waiter', 'kitchen', 'customer'],
@@ -435,9 +436,10 @@ function App() {
   if (token && user && dashboard) {
     const visibleActivePage = pageIsHiddenForRole(activePage, user.role) ? 'dashboard' : activePage;
     const sidebarItems = ([
-    { id: 'dashboard', label: 'Dashboard', marker: 'D', detail: 'Company overview' },
-    { id: 'orders', label: 'Orders', marker: 'O', detail: `${dashboard.orders.length} total` },
+      { id: 'dashboard', label: 'Dashboard', marker: 'D', detail: 'Company overview' },
+      { id: 'orders', label: 'Orders', marker: 'O', detail: `${dashboard.orders.length} total` },
     { id: 'ordering', label: 'Ordering', marker: 'F', detail: 'Foods & services' },
+    { id: 'payment', label: 'Payments', marker: '$', detail: `${dashboard.orders.filter((order) => order.payment_status !== 'paid').length} due`, hiddenFor: ['waiter', 'kitchen', 'customer'] },
       { id: 'kitchen', label: 'Kitchen', marker: 'K', detail: `${dashboard.orders.filter((order) => ['approved', 'preparing'].includes(order.status)).length} in queue`, hiddenFor: ['waiter', 'cashier', 'customer'] },
       { id: 'booking', label: 'Booking', marker: 'B', detail: `${dashboard.bookings.length} reservations`, hiddenFor: ['waiter', 'kitchen', 'customer'] },
       { id: 'spaces', label: 'Tables', marker: 'T', detail: `${dashboard.spaces.length} spaces`, hiddenFor: ['waiter', 'kitchen', 'customer'] },
