@@ -688,6 +688,8 @@ router.post('/orders/:id/request-payment', requireAuth, permit('waiter', 'manage
 
 router.post('/orders/:id/complete-payment', requireAuth, permit('cashier', 'manager', 'owner'), async (req, res) => {
   const paymentMethod = String(req.body?.payment_method || '').trim();
+  const paidAmount = Number(req.body?.paid_amount || 0);
+  const changeAmount = Number(req.body?.change_amount || 0);
   const order = await store.findById('orders', req.params.id);
   if (!order) {
     return res.status(404).json({ message: 'Order not found' });
@@ -697,15 +699,33 @@ router.post('/orders/:id/complete-payment', requireAuth, permit('cashier', 'mana
     return res.status(400).json({ message: 'Payment method is required' });
   }
 
-  if (!ensureOrderState(res, order, ['payment_requested'], 'completed')) {
-    return null;
+  if (!Number.isFinite(paidAmount) || paidAmount < Number(order.total)) {
+    return res.status(400).json({ message: 'Paid amount must cover the order total' });
+  }
+
+  if (!Number.isFinite(changeAmount) || changeAmount < 0) {
+    return res.status(400).json({ message: 'Change amount cannot be negative' });
+  }
+
+  if (isTerminalOrder(order)) {
+    return res.status(409).json({ message: 'Completed or cancelled orders cannot be changed' });
+  }
+
+  if (order.payment_status === 'paid') {
+    return res.status(409).json({ message: 'Payment is already recorded for this order' });
   }
 
   const updated = await store.replaceOrder(order.id, {
     ...order,
     status: 'completed',
     payment_status: 'paid',
-    history: buildOrderHistory({ status: 'completed', by: req.user.role, payment_method: paymentMethod }, order.history),
+    history: buildOrderHistory({
+      status: 'completed',
+      by: req.user.role,
+      payment_method: paymentMethod,
+      paid_amount: paidAmount,
+      change_amount: changeAmount,
+    }, order.history),
     updated_at: new Date().toISOString(),
   });
 

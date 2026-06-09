@@ -12,6 +12,7 @@ import {
   loadDashboard,
   login,
   prepareItem,
+  completePayment,
   updateCurrentUser,
   updateStaff,
   updateStore,
@@ -360,6 +361,26 @@ function App() {
     }
   }
 
+  async function handleCompletePayment(orderId: number, paymentMethod: string, paymentDetails: { paid_amount: number; change_amount: number }) {
+    if (!token) {
+      setMessage('You must be signed in to complete payments.');
+      throw new Error('Missing token');
+    }
+
+    setLoading(true);
+    try {
+      const updated = await completePayment(token, orderId, paymentMethod, paymentDetails);
+      await openDashboard(token);
+      setMessage(`Payment recorded for order #${updated.id} by ${paymentMethod.replace(/_/g, ' ')}.`);
+      return updated;
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Could not complete payment');
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  }
+
   async function handleAddSpace(payload: {
     label: string;
     kind: string;
@@ -439,7 +460,6 @@ function App() {
       { id: 'dashboard', label: 'Dashboard', marker: 'D', detail: 'Company overview' },
       { id: 'orders', label: 'Orders', marker: 'O', detail: `${dashboard.orders.length} total` },
     { id: 'ordering', label: 'Ordering', marker: 'F', detail: 'Foods & services' },
-    { id: 'payment', label: 'Payments', marker: '$', detail: `${dashboard.orders.filter((order) => order.payment_status !== 'paid').length} due`, hiddenFor: ['waiter', 'kitchen', 'customer'] },
       { id: 'kitchen', label: 'Kitchen', marker: 'K', detail: `${dashboard.orders.filter((order) => ['approved', 'preparing'].includes(order.status)).length} in queue`, hiddenFor: ['waiter', 'cashier', 'customer'] },
       { id: 'booking', label: 'Booking', marker: 'B', detail: `${dashboard.bookings.length} reservations`, hiddenFor: ['waiter', 'kitchen', 'customer'] },
       { id: 'spaces', label: 'Tables', marker: 'T', detail: `${dashboard.spaces.length} spaces`, hiddenFor: ['waiter', 'kitchen', 'customer'] },
@@ -605,7 +625,14 @@ function App() {
               onUpdateBranch={handleUpdateBranch}
             />
           ) : null}
-          {visibleActivePage === 'chashiar' ? <ChashiarPage orders={dashboard.orders} /> : null}
+          {visibleActivePage === 'chashiar' ? (
+            <ChashiarPage
+              orders={dashboard.orders}
+              store={dashboard.store}
+              staff={dashboard.staff}
+              onCompletePayment={handleCompletePayment}
+            />
+          ) : null}
           {visibleActivePage === 'menu' ? <MenuPage menuItems={dashboard.menuItems} /> : null}
           {visibleActivePage === 'company-settings' ? (
             <CompanySettingsPage

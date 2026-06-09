@@ -86,7 +86,14 @@ export interface Order {
   notes: string;
   total: number;
   items: OrderItem[];
-  history: Array<{ at: string; status: string; by: string; payment_method?: string }>;
+  history: Array<{
+    at: string;
+    status: string;
+    by: string;
+    payment_method?: string;
+    paid_amount?: number;
+    change_amount?: number;
+  }>;
 }
 
 export interface Notification {
@@ -335,9 +342,9 @@ export function requestPayment(token: string, orderId: number) {
   }, token);
 }
 
-export function completePayment(token: string, orderId: number, paymentMethod: string) {
+export function completePayment(token: string, orderId: number, paymentMethod: string, paymentDetails?: { paid_amount: number; change_amount: number }) {
   return request<Order>(`/orders/${orderId}/complete-payment`, {
     method: 'POST',
-    body: JSON.stringify({ payment_method: paymentMethod }),
+    body: JSON.stringify({ payment_method: paymentMethod, ...(paymentDetails || {}) }),
   }, token);
 }
