@@ -1,0 +1,166 @@
+.owner-dashboard {
+  display: grid;
+  gap: 18px;
+}
+
+.owner-hero {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  min-height: 170px;
+  background:
+    linear-gradient(115deg, rgba(20, 83, 45, 0.93), rgba(23, 32, 51, 0.9)),
+    url('../../assets/hero.png') right 26px center / 180px auto no-repeat;
+  color: #fff;
+}
+
+.owner-hero span {
+  display: block;
+  margin-bottom: 8px;
+  color: #c7f9d4;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.owner-hero h2 {
+  margin-bottom: 10px;
+  font-size: clamp(32px, 5vw, 56px);
+  line-height: 1;
+}
+
+.owner-hero p {
+  max-width: 620px;
+  margin-bottom: 0;
+  color: #e7f7ec;
+}
+
+.owner-hero button {
+  color: #14532d;
+  background: #f8fafc;
+}
+
+.owner-kpis {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.owner-kpis article,
+.pipeline-grid article {
+  border: 1px solid #d8dee8;
+  border-radius: 8px;
+  padding: 16px;
+  background: #fff;
+}
+
+.owner-kpis span,
+.pipeline-grid span {
+  display: block;
+  color: #66758d;
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.owner-kpis b {
+  display: block;
+  margin: 8px 0;
+  font-size: clamp(24px, 4vw, 38px);
+  line-height: 1;
+}
+
+.owner-kpis p {
+  margin-bottom: 0;
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(280px, 1fr));
+  gap: 18px;
+}
+
+.pipeline-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.pipeline-grid b {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 34px;
+}
+
+.summary-list {
+  display: grid;
+  gap: 10px;
+}
+
+.summary-list article {
+  border: 1px solid #e4e9f0;
+  border-radius: 8px;
+  padding: 12px;
+  background: #f8fafc;
+}
+
+.summary-list p {
+  margin-bottom: 0;
+}
+
+@media (max-width: 980px) {
+  .owner-kpis,
+  .dashboard-grid,
+  .pipeline-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .owner-hero {
+    align-items: stretch;
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 620px) {
+  .owner-dashboard {
+    gap: 12px;
+  }
+
+  .owner-hero {
+    min-height: auto;
+    padding: 18px 12px;
+    background:
+      linear-gradient(115deg, rgba(20, 83, 45, 0.94), rgba(23, 32, 51, 0.92)),
+      url('../../assets/hero.png') right 10px top 12px / 76px auto no-repeat;
+  }
+
+  .owner-hero h2 {
+    font-size: 26px;
+  }
+
+  .owner-hero p {
+    max-width: none;
+    font-size: 14px;
+  }
+
+  .owner-hero button {
+    width: 100%;
+  }
+
+  .owner-kpis {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .owner-kpis article,
+  .pipeline-grid article,
+  .summary-list article {
+    padding: 10px;
+  }
+
+  .pipeline-grid b {
+    font-size: 24px;
+  }
+}

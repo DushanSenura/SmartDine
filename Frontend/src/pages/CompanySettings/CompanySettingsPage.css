@@ -1,0 +1,274 @@
+.company-settings-page {
+  display: grid;
+  gap: 18px;
+}
+
+.company-settings-hero {
+  min-height: 150px;
+  display: flex;
+  align-items: center;
+  background:
+    linear-gradient(115deg, rgba(51, 65, 85, 0.92), rgba(20, 83, 45, 0.9)),
+    url('../../assets/hero.png') right 26px center / 160px auto no-repeat;
+  color: #fff;
+}
+
+.company-settings-hero span {
+  display: block;
+  margin-bottom: 8px;
+  color: #bbf7d0;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.company-settings-hero h2 {
+  margin-bottom: 10px;
+  font-size: clamp(32px, 5vw, 52px);
+  line-height: 1;
+}
+
+.company-settings-hero p {
+  max-width: 680px;
+  margin-bottom: 0;
+  color: #e2e8f0;
+}
+
+.company-settings-stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.company-settings-stats article {
+  border: 1px solid #d8dee8;
+  border-radius: 8px;
+  padding: 16px;
+  background: #fff;
+}
+
+.company-settings-stats span {
+  display: block;
+  color: #66758d;
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.company-settings-stats b {
+  display: block;
+  margin-top: 8px;
+  font-size: 34px;
+  line-height: 1;
+}
+
+.company-settings-layout {
+  display: grid;
+  grid-template-columns: minmax(280px, 0.8fr) minmax(0, 1.2fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.company-profile-panel {
+  grid-row: span 2;
+}
+
+.company-settings-form {
+  display: grid;
+  gap: 14px;
+}
+
+.company-settings-form button {
+  justify-self: end;
+}
+
+.company-settings-message {
+  margin: 0;
+  border-radius: 6px;
+  padding: 10px 12px;
+  color: #14532d;
+  background: #e8f5ec;
+  font-weight: 800;
+}
+
+.settings-info-card,
+.settings-list article,
+.settings-role-grid article {
+  border: 1px solid #e4e9f0;
+  border-radius: 8px;
+  padding: 14px;
+  background: #f8fafc;
+}
+
+.settings-info-card strong {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 22px;
+}
+
+.settings-info-card p {
+  margin-bottom: 10px;
+  font-weight: 800;
+}
+
+.settings-info-card span,
+.settings-list small {
+  color: #66758d;
+}
+
+.settings-list {
+  display: grid;
+  gap: 10px;
+}
+
+.settings-list article {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.settings-list article.selected {
+  border-color: #15803d;
+  background: #eef9f0;
+}
+
+.settings-list div {
+  min-width: 0;
+}
+
+.settings-list strong,
+.settings-list p,
+.settings-list small {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.settings-list p {
+  margin-bottom: 4px;
+}
+
+.settings-pill {
+  width: max-content;
+  max-width: 100%;
+  border-radius: 999px;
+  padding: 6px 9px;
+  color: #0f5132;
+  background: #dcfce7;
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.settings-branch-edit {
+  flex: 0 0 auto;
+  min-height: 34px;
+  padding: 7px 10px;
+  color: #172033;
+  background: #eef3f7;
+}
+
+.settings-pill.closed,
+.settings-pill.maintenance,
+.settings-pill.occupied {
+  color: #991b1b;
+  background: #fee2e2;
+}
+
+.settings-pill.bookable {
+  color: #1e3a8a;
+  background: #dbeafe;
+}
+
+.settings-role-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.settings-role-grid span {
+  display: block;
+  color: #66758d;
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.settings-role-grid b {
+  display: block;
+  margin-top: 8px;
+  font-size: 30px;
+}
+
+.settings-role-grid p {
+  margin-bottom: 0;
+}
+
+@media (max-width: 980px) {
+  .company-settings-stats,
+  .company-settings-layout,
+  .settings-role-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .company-profile-panel {
+    grid-row: auto;
+  }
+
+  .company-settings-form button {
+    justify-self: stretch;
+  }
+
+  .settings-list article {
+    align-items: stretch;
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 620px) {
+  .company-settings-page {
+    gap: 12px;
+  }
+
+  .company-settings-hero {
+    min-height: auto;
+    padding: 18px 12px;
+    background:
+      linear-gradient(115deg, rgba(51, 65, 85, 0.94), rgba(20, 83, 45, 0.92)),
+      url('../../assets/hero.png') right 10px top 12px / 76px auto no-repeat;
+  }
+
+  .company-settings-hero h2 {
+    font-size: 26px;
+  }
+
+  .company-settings-hero p {
+    max-width: none;
+    font-size: 14px;
+  }
+
+  .company-settings-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .company-settings-stats article,
+  .settings-info-card,
+  .settings-list article,
+  .settings-role-grid article {
+    padding: 10px;
+  }
+
+  .company-settings-stats b,
+  .settings-role-grid b {
+    font-size: 24px;
+  }
+
+  .settings-branch-edit,
+  .company-settings-form button {
+    width: 100%;
+  }
+}

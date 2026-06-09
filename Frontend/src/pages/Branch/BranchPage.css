@@ -1,0 +1,521 @@
+.branch-page {
+  display: grid;
+  gap: 18px;
+}
+
+.branch-page-hero {
+  min-height: 150px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  background:
+    linear-gradient(115deg, rgba(15, 118, 110, 0.92), rgba(23, 32, 51, 0.9)),
+    url('../../assets/hero.png') right 26px center / 160px auto no-repeat;
+  color: #fff;
+}
+
+.branch-page-hero button {
+  color: #0f766e;
+  background: #fff;
+}
+
+.branch-page-hero span {
+  display: block;
+  margin-bottom: 8px;
+  color: #ccfbf1;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.branch-page-hero h2 {
+  margin-bottom: 10px;
+  font-size: clamp(32px, 5vw, 52px);
+  line-height: 1;
+}
+
+.branch-page-hero p {
+  max-width: 680px;
+  margin-bottom: 0;
+  color: #e6fffb;
+}
+
+.branch-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(3px);
+}
+
+.branch-modal {
+  width: min(100%, 640px);
+  max-height: calc(100vh - 48px);
+  overflow: auto;
+}
+
+.branch-detail-modal {
+  width: min(100%, 760px);
+  max-height: calc(100vh - 48px);
+  overflow: auto;
+}
+
+.branch-modal-close {
+  color: #172033;
+  background: #eef3f7;
+}
+
+.add-branch-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  align-items: end;
+}
+
+.add-branch-form button {
+  grid-column: 1 / -1;
+}
+
+.branch-stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.branch-stats article {
+  border: 1px solid #d8dee8;
+  border-radius: 8px;
+  padding: 16px;
+  background: #fff;
+}
+
+.branch-stats span {
+  display: block;
+  color: #66758d;
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.branch-stats b {
+  display: block;
+  margin-top: 8px;
+  font-size: 30px;
+  line-height: 1;
+  text-transform: capitalize;
+}
+
+.branch-layout {
+  display: grid;
+  grid-template-columns: minmax(280px, 0.8fr) minmax(0, 1.2fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.branch-profile {
+  grid-row: span 2;
+}
+
+.branch-profile-card {
+  border: 1px solid #e4e9f0;
+  border-radius: 8px;
+  padding: 16px;
+  background: #f8fafc;
+}
+
+.branch-profile-card strong {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 22px;
+}
+
+.branch-profile-card p {
+  margin-bottom: 10px;
+  font-weight: 800;
+}
+
+.branch-profile-card span {
+  color: #66758d;
+}
+
+.branch-space-list,
+.branch-staff-list,
+.branch-list {
+  display: grid;
+  gap: 10px;
+}
+
+.branch-space-list article,
+.branch-staff-list article {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border: 1px solid #e4e9f0;
+  border-radius: 8px;
+  padding: 12px;
+  color: #172033;
+  background: #f8fafc;
+  text-align: left;
+}
+
+.branch-list-card {
+  display: grid;
+  gap: 10px;
+  width: 100%;
+  border: 1px solid #e4e9f0;
+  border-radius: 8px;
+  padding: 12px;
+  background: #f8fafc;
+}
+
+.branch-list-card:hover {
+  border-color: #9bb8ad;
+  background: #eefaf5;
+}
+
+.branch-card-main {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  min-height: 0;
+  padding: 0;
+  color: #172033;
+  background: transparent;
+  text-align: left;
+}
+
+.branch-card-actions,
+.branch-detail-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.branch-card-actions button,
+.branch-detail-actions button {
+  min-height: 34px;
+  padding: 7px 10px;
+  font-size: 13px;
+}
+
+.branch-space-list p,
+.branch-staff-list p,
+.branch-list p {
+  margin-bottom: 0;
+}
+
+.branch-list div {
+  min-width: 0;
+}
+
+.branch-list strong,
+.branch-list p,
+.branch-list small {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.branch-list small {
+  margin-top: 6px;
+  color: #66758d;
+  font-weight: 700;
+}
+
+.branch-space-list span {
+  border-radius: 999px;
+  padding: 6px 9px;
+  color: #0f766e;
+  background: #ccfbf1;
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.branch-status {
+  border-radius: 999px;
+  padding: 6px 9px;
+  color: #0f766e;
+  background: #ccfbf1;
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.branch-status.closed,
+.branch-status.maintenance {
+  color: #991b1b;
+  background: #fee2e2;
+}
+
+.branch-detail-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.branch-detail-summary article,
+.branch-detail-section {
+  border: 1px solid #e4e9f0;
+  border-radius: 8px;
+  padding: 12px;
+  background: #f8fafc;
+}
+
+.branch-detail-summary span,
+.branch-detail-section span {
+  display: block;
+  color: #66758d;
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.branch-detail-summary b {
+  display: block;
+  margin-top: 6px;
+  overflow-wrap: anywhere;
+  text-transform: capitalize;
+}
+
+.branch-detail-section {
+  margin-top: 12px;
+}
+
+.branch-detail-section p {
+  margin: 8px 0 0;
+  font-weight: 800;
+}
+
+.branch-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.branch-finance-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.branch-finance-grid article {
+  border: 1px solid #d8dee8;
+  border-radius: 8px;
+  padding: 12px;
+  background: #fff;
+}
+
+.branch-finance-grid span {
+  color: #66758d;
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.branch-finance-grid strong {
+  display: block;
+  margin-top: 8px;
+  font-size: 24px;
+}
+
+.branch-finance-grid p {
+  margin: 6px 0 0;
+  color: #66758d;
+}
+
+.branch-billing-list {
+  display: grid;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.branch-billing-list article {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: 12px;
+  align-items: center;
+  border: 1px solid #e4e9f0;
+  border-radius: 8px;
+  padding: 10px 12px;
+  background: #fff;
+}
+
+.branch-billing-list p {
+  margin: 3px 0 0;
+  color: #66758d;
+}
+
+.branch-billing-list span {
+  width: max-content;
+  max-width: 100%;
+  border-radius: 999px;
+  padding: 6px 9px;
+  color: #1e3a8a;
+  background: #dbeafe;
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.branch-billing-list b {
+  white-space: nowrap;
+}
+
+.branch-detail-grid article {
+  position: relative;
+  display: grid;
+  gap: 4px;
+  border: 1px solid #e4e9f0;
+  border-radius: 8px;
+  padding: 12px;
+  background: #fff;
+}
+
+.branch-detail-grid strong,
+.branch-detail-grid p,
+.branch-detail-grid small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.branch-detail-grid p {
+  margin: 0;
+  font-weight: 800;
+}
+
+.branch-detail-grid small {
+  color: #66758d;
+  font-weight: 700;
+}
+
+.branch-mini-status {
+  width: max-content;
+  max-width: 100%;
+  border-radius: 999px;
+  padding: 5px 8px;
+  color: #475569;
+  background: #e2e8f0;
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.branch-mini-status.active,
+.branch-mini-status.available,
+.branch-mini-status.bookable {
+  color: #0f5132;
+  background: #dcfce7;
+}
+
+.branch-mini-status.closed,
+.branch-mini-status.occupied {
+  color: #991b1b;
+  background: #fee2e2;
+}
+
+@media (max-width: 980px) {
+  .branch-stats,
+  .branch-layout,
+  .branch-detail-summary,
+  .branch-detail-grid,
+  .branch-finance-grid,
+  .branch-billing-list article,
+  .add-branch-form {
+    grid-template-columns: 1fr;
+  }
+
+  .branch-page-hero {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .branch-profile {
+    grid-row: auto;
+  }
+}
+
+@media (max-width: 620px) {
+  .branch-page {
+    gap: 12px;
+  }
+
+  .branch-page-hero {
+    min-height: auto;
+    padding: 18px 12px;
+    background:
+      linear-gradient(115deg, rgba(15, 118, 110, 0.94), rgba(23, 32, 51, 0.92)),
+      url('../../assets/hero.png') right 10px top 12px / 76px auto no-repeat;
+  }
+
+  .branch-page-hero h2 {
+    font-size: 26px;
+  }
+
+  .branch-page-hero p {
+    max-width: none;
+    font-size: 14px;
+  }
+
+  .branch-page-hero button,
+  .add-branch-form button {
+    width: 100%;
+  }
+
+  .branch-modal-backdrop {
+    padding: 10px;
+  }
+
+  .branch-modal,
+  .branch-detail-modal {
+    max-height: calc(100vh - 20px);
+  }
+
+  .branch-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .branch-stats article,
+  .branch-profile-card,
+  .branch-list-card,
+  .branch-detail-summary article,
+  .branch-detail-section {
+    padding: 10px;
+  }
+
+  .branch-stats b {
+    font-size: 24px;
+  }
+
+  .branch-card-main,
+  .branch-space-list article,
+  .branch-staff-list article {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .branch-card-actions,
+  .branch-detail-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .branch-card-actions button,
+  .branch-detail-actions button {
+    width: 100%;
+  }
+}

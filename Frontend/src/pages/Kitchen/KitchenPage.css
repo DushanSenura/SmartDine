@@ -1,0 +1,242 @@
+.kitchen-page {
+  display: grid;
+  gap: 18px;
+}
+
+.kitchen-page-hero {
+  min-height: 150px;
+  display: flex;
+  align-items: center;
+  background:
+    linear-gradient(115deg, rgba(127, 29, 29, 0.94), rgba(30, 41, 59, 0.92)),
+    url('../../assets/hero.png') right 26px center / 160px auto no-repeat;
+  color: #fff;
+}
+
+.kitchen-page-hero span {
+  display: block;
+  margin-bottom: 8px;
+  color: #fecaca;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.kitchen-page-hero h2 {
+  margin-bottom: 10px;
+  font-size: clamp(32px, 5vw, 52px);
+  line-height: 1;
+}
+
+.kitchen-page-hero p {
+  max-width: 620px;
+  margin-bottom: 0;
+  color: #fee2e2;
+}
+
+.kitchen-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.kitchen-stats article {
+  border: 1px solid #d8dee8;
+  border-radius: 8px;
+  padding: 16px;
+  background: #fff;
+}
+
+.kitchen-stats span {
+  display: block;
+  color: #66758d;
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.kitchen-stats b {
+  display: block;
+  margin-top: 8px;
+  font-size: 34px;
+  line-height: 1;
+}
+
+.kitchen-table {
+  display: grid;
+  gap: 10px;
+}
+
+.kitchen-table-head,
+.kitchen-row {
+  display: grid;
+  grid-template-columns: 0.7fr 1fr 1.3fr 1fr 0.7fr 0.9fr;
+  gap: 12px;
+  align-items: center;
+}
+
+.kitchen-table-head {
+  padding: 0 12px 6px;
+  color: #66758d;
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.kitchen-table-body {
+  display: grid;
+  gap: 8px;
+}
+
+.kitchen-row {
+  border: 1px solid #e4e9f0;
+  border-radius: 8px;
+  padding: 12px;
+  background: #f8fafc;
+}
+
+.kitchen-row div {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.kitchen-row strong,
+.kitchen-row small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.kitchen-row small {
+  color: #66758d;
+  font-weight: 700;
+}
+
+.kitchen-row .primary {
+  width: 100%;
+}
+
+.kitchen-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+  background: rgba(15, 23, 42, 0.56);
+}
+
+.kitchen-modal {
+  width: min(820px, 100%);
+  max-height: min(92vh, 820px);
+  overflow: auto;
+  display: grid;
+  gap: 12px;
+  background: #fff;
+}
+
+.kitchen-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+}
+
+.kitchen-modal-header span {
+  display: block;
+
+/* Add spacing between item name and its status */
+.kitchen-modal-item div small {
+  margin-left: 8px;
+  display: inline-block;
+  color: #64748b;
+  font-weight: 700;
+}
+  margin-bottom: 4px;
+  color: #66758d;
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.kitchen-modal-items {
+  border: 1px solid #e4e9f0;
+  border-radius: 8px;
+  padding: 12px;
+  background: #f8fafc;
+  display: grid;
+  gap: 8px;
+}
+
+.kitchen-modal-item {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 10px;
+  align-items: center;
+  border-top: 1px solid #e2e8f0;
+  padding-top: 8px;
+}
+
+.kitchen-modal-item:first-of-type {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.kitchen-modal-actions {
+  display: flex;
+  justify-content: end;
+  gap: 8px;
+}
+
+@media (max-width: 980px) {
+  .kitchen-stats,
+  .kitchen-table-head,
+  .kitchen-row {
+    grid-template-columns: 1fr;
+  }
+
+  .kitchen-table-head {
+    display: none;
+  }
+}
+
+@media (max-width: 620px) {
+  .kitchen-page {
+    gap: 12px;
+  }
+
+  .kitchen-page-hero {
+    min-height: auto;
+    padding: 18px 12px;
+    background:
+      linear-gradient(115deg, rgba(127, 29, 29, 0.95), rgba(30, 41, 59, 0.93)),
+      url('../../assets/hero.png') right 10px top 12px / 76px auto no-repeat;
+  }
+
+  .kitchen-page-hero h2 {
+    font-size: 26px;
+  }
+
+  .kitchen-page-hero p {
+    max-width: none;
+    font-size: 14px;
+  }
+
+  .kitchen-stats {
+    gap: 8px;
+  }
+
+  .kitchen-stats article,
+  .kitchen-row {
+    padding: 10px;
+  }
+
+  .kitchen-stats b {
+    font-size: 24px;
+  }
+
+  .kitchen-row {
+    gap: 8px;
+  }
+}
