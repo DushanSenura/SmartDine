@@ -12,8 +12,6 @@ import {
   loadDashboard,
   login,
   prepareItem,
-  requestPayment,
-  completePayment,
   updateCurrentUser,
   updateStaff,
   updateStore,
@@ -27,15 +25,14 @@ import BranchPage from './pages/Branch/BranchPage';
 import MenuPage from './pages/Menu/MenuPage';
 import BookingPage from './pages/Booking/BookingPage';
 import TableRoomsPage from './pages/TableRooms/TableRoomsPage';
-import ChashiarPage from './pages/Chashiar/ChashiarPage';
+import ChashiarPage from './pages/Cashier/ChashiarPage';
 import KitchenPage from './pages/Kitchen/KitchenPage';
 import CompanySettingsPage from './pages/CompanySettings/CompanySettingsPage';
 import PersonalSettingsPage from './pages/PersonalSettings/PersonalSettingsPage';
-import PaymentPage from './pages/Payment/PaymentPage';
 import FoodServiceOrderPage from './pages/FoodServiceOrder/FoodServiceOrderPage';
 import logoImage from './assets/logo.png';
 
-type DashboardPageId = 'dashboard' | 'orders' | 'ordering' | 'payment' | 'kitchen' | 'booking' | 'spaces' | 'staff' | 'branch' | 'chashiar' | 'menu' | 'company-settings' | 'personal-settings';
+type DashboardPageId = 'dashboard' | 'orders' | 'ordering' | 'kitchen' | 'booking' | 'spaces' | 'staff' | 'branch' | 'chashiar' | 'menu' | 'company-settings' | 'personal-settings';
 type SidebarItem = {
   id: DashboardPageId;
   label: string;
@@ -54,7 +51,6 @@ const demoCredentials = [
 
 const hiddenPagesByRole: Partial<Record<DashboardPageId, Array<User['role']>>> = {
   ordering: ['kitchen'],
-  payment: ['waiter', 'kitchen', 'customer'],
   kitchen: ['waiter', 'cashier', 'customer'],
   booking: ['waiter', 'kitchen', 'customer'],
   spaces: ['waiter', 'kitchen', 'customer'],
@@ -363,44 +359,6 @@ function App() {
     }
   }
 
-  async function handleRequestPayment(orderId: number) {
-    if (!token) {
-      setMessage('You must be signed in to request payments.');
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const updated = await requestPayment(token, orderId);
-      await openDashboard(token);
-      setMessage(`Requested payment for order #${updated.id}.`);
-    } catch (error) {
-      setMessage(error instanceof Error ? error.message : 'Could not request payment');
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  async function handleCompletePayment(orderId: number, paymentMethod: string) {
-    if (!token) {
-      setMessage('You must be signed in to complete payments.');
-      throw new Error('Missing token');
-    }
-
-    setLoading(true);
-    try {
-      const updated = await completePayment(token, orderId, paymentMethod);
-      await openDashboard(token);
-      setMessage(`Payment recorded for order #${updated.id} by ${paymentMethod.replace(/_/g, ' ')}.`);
-      return updated;
-    } catch (error) {
-      setMessage(error instanceof Error ? error.message : 'Could not complete payment');
-      throw error;
-    } finally {
-      setLoading(false);
-    }
-  }
-
   async function handleAddSpace(payload: {
     label: string;
     kind: string;
@@ -477,10 +435,9 @@ function App() {
   if (token && user && dashboard) {
     const visibleActivePage = pageIsHiddenForRole(activePage, user.role) ? 'dashboard' : activePage;
     const sidebarItems = ([
-      { id: 'dashboard', label: 'Dashboard', marker: 'D', detail: 'Company overview' },
-      { id: 'orders', label: 'Orders', marker: 'O', detail: `${dashboard.orders.length} total` },
+    { id: 'dashboard', label: 'Dashboard', marker: 'D', detail: 'Company overview' },
+    { id: 'orders', label: 'Orders', marker: 'O', detail: `${dashboard.orders.length} total` },
     { id: 'ordering', label: 'Ordering', marker: 'F', detail: 'Foods & services' },
-    { id: 'payment', label: 'Payments', marker: '$', detail: `${dashboard.orders.filter((order) => order.payment_status !== 'paid').length} due`, hiddenFor: ['waiter', 'kitchen', 'customer'] },
       { id: 'kitchen', label: 'Kitchen', marker: 'K', detail: `${dashboard.orders.filter((order) => ['approved', 'preparing'].includes(order.status)).length} in queue`, hiddenFor: ['waiter', 'cashier', 'customer'] },
       { id: 'booking', label: 'Booking', marker: 'B', detail: `${dashboard.bookings.length} reservations`, hiddenFor: ['waiter', 'kitchen', 'customer'] },
       { id: 'spaces', label: 'Tables', marker: 'T', detail: `${dashboard.spaces.length} spaces`, hiddenFor: ['waiter', 'kitchen', 'customer'] },
@@ -610,14 +567,6 @@ function App() {
               loading={loading}
               onReadyToServe={handleReadyToServe}
               onPrepareItem={handlePrepareItem}
-            />
-          ) : null}
-          {visibleActivePage === 'payment' ? (
-            <PaymentPage
-              orders={dashboard.orders}
-              role={user.role}
-              onRequestPayment={handleRequestPayment}
-              onCompletePayment={handleCompletePayment}
             />
           ) : null}
           {visibleActivePage === 'booking' ? (
