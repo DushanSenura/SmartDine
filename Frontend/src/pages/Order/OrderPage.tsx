@@ -7,6 +7,8 @@ type OrderPageProps = {
   role: Role;
   loading: boolean;
   onApproveOrder: (orderId: number) => Promise<void>;
+  onServeOrder: (orderId: number) => Promise<void>;
+  onRequestPayment: (orderId: number) => Promise<void>;
 };
 
 function formatMoney(amount: number) {
@@ -19,7 +21,7 @@ function readable(value: string) {
 
 const APPROVER_ROLES: Role[] = ['waiter', 'manager', 'owner'];
 
-function OrderPage({ orders, role, loading, onApproveOrder }: OrderPageProps) {
+function OrderPage({ orders, role, loading, onApproveOrder, onServeOrder, onRequestPayment }: OrderPageProps) {
   const [selectedOrderId, setSelectedOrderId] = useState<number | null>(null);
   const sortedOrders = [...orders].sort((left, right) => right.id - left.id);
   const selectedOrder = useMemo(() => (
@@ -29,6 +31,15 @@ function OrderPage({ orders, role, loading, onApproveOrder }: OrderPageProps) {
   const readyOrders = sortedOrders.filter((order) => order.status === 'ready_to_serve');
   const completedOrders = sortedOrders.filter((order) => order.status === 'completed');
   const canApproveOrders = APPROVER_ROLES.includes(role);
+  const canHandleService = APPROVER_ROLES.includes(role);
+
+  function canOpenOrder(order: Order) {
+    if (order.status === 'ready_to_approve' && canApproveOrders) {
+      return true;
+    }
+
+    return canHandleService && ['ready_to_serve', 'served'].includes(order.status);
+  }
 
   async function handleApproveSelectedOrder() {
     if (!selectedOrder || selectedOrder.status !== 'ready_to_approve' || !canApproveOrders || loading) {
@@ -36,6 +47,24 @@ function OrderPage({ orders, role, loading, onApproveOrder }: OrderPageProps) {
     }
 
     await onApproveOrder(selectedOrder.id);
+    setSelectedOrderId(null);
+  }
+
+  async function handleServeSelectedOrder() {
+    if (!selectedOrder || selectedOrder.status !== 'ready_to_serve' || !canHandleService || loading) {
+      return;
+    }
+
+    await onServeOrder(selectedOrder.id);
+    setSelectedOrderId(null);
+  }
+
+  async function handleRequestSelectedPayment() {
+    if (!selectedOrder || selectedOrder.status !== 'served' || !canHandleService || loading) {
+      return;
+    }
+
+    await onRequestPayment(selectedOrder.id);
     setSelectedOrderId(null);
   }
 
@@ -68,17 +97,17 @@ function OrderPage({ orders, role, loading, onApproveOrder }: OrderPageProps) {
         <div className="order-table-body">
           {sortedOrders.map((order) => (
             <article
-              className={order.status === 'ready_to_approve' && canApproveOrders ? 'order-row selectable' : 'order-row'}
+              className={canOpenOrder(order) ? 'order-row selectable' : 'order-row'}
               key={order.id}
               onClick={() => {
-                if (order.status === 'ready_to_approve' && canApproveOrders) {
+                if (canOpenOrder(order)) {
                   setSelectedOrderId(order.id);
                 }
               }}
-              role={order.status === 'ready_to_approve' && canApproveOrders ? 'button' : undefined}
-              tabIndex={order.status === 'ready_to_approve' && canApproveOrders ? 0 : -1}
+              role={canOpenOrder(order) ? 'button' : undefined}
+              tabIndex={canOpenOrder(order) ? 0 : -1}
               onKeyDown={(event) => {
-                if (event.key === 'Enter' && order.status === 'ready_to_approve' && canApproveOrders) {
+                if (event.key === 'Enter' && canOpenOrder(order)) {
                   setSelectedOrderId(order.id);
                 }
               }}
@@ -169,14 +198,36 @@ function OrderPage({ orders, role, loading, onApproveOrder }: OrderPageProps) {
 
             <div className="order-modal-actions">
               <button type="button" className="secondary" onClick={() => setSelectedOrderId(null)}>Cancel</button>
-              <button
-                type="button"
-                className="primary"
-                onClick={() => void handleApproveSelectedOrder()}
-                disabled={selectedOrder.status !== 'ready_to_approve' || !canApproveOrders || loading}
-              >
-                {loading ? 'Approving...' : 'Ready to Approve'}
-              </button>
+              {selectedOrder.status === 'ready_to_approve' ? (
+                <button
+                  type="button"
+                  className="primary"
+                  onClick={() => void handleApproveSelectedOrder()}
+                  disabled={!canApproveOrders || loading}
+                >
+                  {loading ? 'Approving...' : 'Approve and Send to Kitchen'}
+                </button>
+              ) : null}
+              {selectedOrder.status === 'ready_to_serve' ? (
+                <button
+                  type="button"
+                  className="primary"
+                  onClick={() => void handleServeSelectedOrder()}
+                  disabled={!canHandleService || loading}
+                >
+                  {loading ? 'Serving...' : 'Mark Served'}
+                </button>
+              ) : null}
+              {selectedOrder.status === 'served' ? (
+                <button
+                  type="button"
+                  className="primary"
+                  onClick={() => void handleRequestSelectedPayment()}
+                  disabled={!canHandleService || loading}
+                >
+                  {loading ? 'Requesting...' : 'Send to Cashier'}
+                </button>
+              ) : null}
             </div>
           </section>
         </div>

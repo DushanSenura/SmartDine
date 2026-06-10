@@ -13,6 +13,8 @@ import {
   login,
   prepareItem,
   completePayment,
+  requestPayment,
+  serveItem,
   updateCurrentUser,
   updateStaff,
   updateStore,
@@ -361,6 +363,57 @@ function App() {
     }
   }
 
+  async function handleServeOrder(orderId: number) {
+    if (!token) {
+      setMessage('You must be signed in to serve orders.');
+      return;
+    }
+
+    const currentOrder = dashboard?.orders.find((order) => order.id === orderId);
+    if (!currentOrder) {
+      setMessage('Order not found. Refresh and try again.');
+      return;
+    }
+
+    const preparedItems = currentOrder.items.filter((item) => item.status === 'prepared');
+    if (!preparedItems.length) {
+      setMessage(`Order #${orderId} has no prepared items to serve.`);
+      return;
+    }
+
+    setLoading(true);
+    try {
+      for (const item of preparedItems) {
+        await serveItem(token, orderId, item.id);
+      }
+
+      await openDashboard(token);
+      setMessage(`Order #${orderId} served and sent to cashier.`);
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Could not serve order');
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleRequestPayment(orderId: number) {
+    if (!token) {
+      setMessage('You must be signed in to request payment.');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const updated = await requestPayment(token, orderId);
+      await openDashboard(token);
+      setMessage(`Payment requested for order #${updated.id}. Cashier has been notified.`);
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Could not request payment');
+    } finally {
+      setLoading(false);
+    }
+  }
+
   async function handleCompletePayment(orderId: number, paymentMethod: string, paymentDetails: { paid_amount: number; change_amount: number }) {
     if (!token) {
       setMessage('You must be signed in to complete payments.');
@@ -572,6 +625,8 @@ function App() {
               role={user.role}
               loading={loading}
               onApproveOrder={handleApproveOrder}
+              onServeOrder={handleServeOrder}
+              onRequestPayment={handleRequestPayment}
             />
           ) : null}
           {visibleActivePage === 'ordering' ? (

@@ -534,7 +534,6 @@ router.post('/orders', requireAuth, permit('waiter', 'manager', 'owner'), async 
     history: buildOrderHistory({ status: 'ready_to_approve', by: 'waiter' }),
   });
 
-  await store.addDemoNotification(space.store_id, order.id, 'kitchen', 'order_created', `Order ${order.id} is waiting for approval.`);
   await store.addDemoNotification(space.store_id, order.id, 'waiter', 'assisted_order_created', `Assisted order ${order.id} is ready for waiter approval.`);
 
   return res.status(201).json(order);
@@ -564,7 +563,6 @@ router.patch('/orders/:id/approve', requireAuth, permit('waiter', 'manager', 'ow
   });
 
   await store.addDemoNotification(order.store_id, order.id, 'kitchen', 'order_approved', `Order ${order.id} was approved and sent to the kitchen.`);
-  await store.addDemoNotification(order.store_id, order.id, 'cashier', 'order_approved', `Order ${order.id} was approved and sent to cashier.`);
 
   return res.json(updated);
 });
@@ -636,17 +634,21 @@ router.patch('/orders/:id/items/:itemId/serve', requireAuth, permit('waiter', 'm
       : item
   ));
   const allServed = nextItems.every((item) => item.status === 'served');
+  const nextStatus = allServed ? 'payment_requested' : 'ready_to_serve';
+  const nextPaymentStatus = allServed ? 'pending_bill' : order.payment_status;
 
   const updated = await store.replaceOrder(order.id, {
     ...order,
     items: nextItems,
-    status: allServed ? 'served' : 'ready_to_serve',
-    history: buildOrderHistory({ status: allServed ? 'served' : 'ready_to_serve', by: req.user.role }, order.history),
+    status: nextStatus,
+    payment_status: nextPaymentStatus,
+    history: buildOrderHistory({ status: nextStatus, by: req.user.role }, order.history),
     updated_at: new Date().toISOString(),
   });
 
   if (allServed) {
-    await store.addDemoNotification(order.store_id, order.id, 'customer', 'order_served', `All dishes for order ${order.id} have been served. Enjoy your meal.`);
+    await store.addDemoNotification(order.store_id, order.id, 'cashier', 'payment_requested', `Order ${order.id} has been served. Start billing for ${order.customer_name}.`);
+    await store.addDemoNotification(order.store_id, order.id, 'customer', 'order_served', `All dishes for order ${order.id} have been served. Your bill is being prepared.`);
   }
 
   return res.json(updated);
