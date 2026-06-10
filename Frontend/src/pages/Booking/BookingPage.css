@@ -120,6 +120,11 @@
   align-items: center;
 }
 
+.booking-table-head.with-actions,
+.booking-row.with-actions {
+  grid-template-columns: 1.25fr 1.1fr 0.65fr 0.9fr auto minmax(150px, auto);
+}
+
 .booking-table-head {
   padding: 0 12px 6px;
   color: #66758d;
@@ -178,6 +183,22 @@
 }
 
 .booking-pill.cancelled {
+  color: #991b1b;
+  background: #fee2e2;
+}
+
+.booking-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.booking-actions button {
+  padding: 9px 12px;
+}
+
+.booking-actions .danger {
   color: #991b1b;
   background: #fee2e2;
 }

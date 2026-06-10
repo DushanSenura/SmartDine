@@ -58,26 +58,47 @@ function normalizeEditableItems(items, orderId) {
   }));
 }
 
-async function createBookingWithGuards(res, payload) {
+async function validateBookingPayload(res, payload, currentBookingId) {
   const space = (await store.list('spaces')).find((entry) => entry.label === payload.space_label);
   if (!space) {
     res.status(404).json({ message: 'Selected table or private room does not exist' });
-    return null;
+    return false;
   }
 
   if (space.kind !== payload.space_kind) {
     res.status(400).json({ message: 'Booking space type does not match selected space' });
-    return null;
+    return false;
   }
 
   if (Number(payload.party_size) > Number(space.capacity)) {
     res.status(400).json({ message: `${space.label} only supports ${space.capacity} guests` });
-    return null;
+    return false;
   }
 
-  const conflict = await store.hasBookingConflict(payload.space_label, payload.booking_time);
+  const requested = new Date(payload.booking_time).getTime();
+  if (Number.isNaN(requested)) {
+    res.status(400).json({ message: 'Booking time is invalid' });
+    return false;
+  }
+
+  const twoHours = 2 * 60 * 60 * 1000;
+  const conflict = (await store.list('bookings')).some((booking) => (
+    booking.status !== 'cancelled'
+    && booking.id !== Number(currentBookingId)
+    && booking.space_label === payload.space_label
+    && Math.abs(new Date(booking.booking_time).getTime() - requested) < twoHours
+  ));
   if (conflict) {
     res.status(409).json({ message: `${payload.space_label} already has a booking near that time` });
+    return false;
+  }
+
+  return true;
+}
+
+async function createBookingWithGuards(res, payload) {
+  const valid = await validateBookingPayload(res, payload);
+  if (!valid) {
     return null;
   }
 
@@ -493,6 +514,46 @@ router.post('/bookings', requireAuth, async (req, res) => {
   }
 
   return res.status(201).json(row);
+});
+
+router.patch('/bookings/:id', requireAuth, permit('owner', 'manager'), async (req, res) => {
+  const current = await store.findById('bookings', req.params.id);
+  if (!current) {
+    return res.status(404).json({ message: 'Booking not found' });
+  }
+
+  const { customer_name, customer_email, space_kind, space_label, party_size, booking_time, notes, status } = req.body || {};
+  if (!customer_name || !customer_email || !space_kind || !space_label || !booking_time || !status) {
+    return res.status(400).json({ message: 'Missing booking details' });
+  }
+
+  const payload = {
+    store_id: current.store_id,
+    customer_name,
+    customer_email,
+    space_kind,
+    space_label,
+    party_size: Number(party_size || 2),
+    booking_time,
+    notes: notes || '',
+    status,
+  };
+  const valid = await validateBookingPayload(res, payload, current.id);
+  if (!valid) {
+    return null;
+  }
+
+  const updated = await store.update('bookings', current.id, payload);
+  return res.json(updated);
+});
+
+router.delete('/bookings/:id', requireAuth, permit('owner', 'manager'), async (req, res) => {
+  const removed = await store.delete('bookings', req.params.id);
+  if (!removed) {
+    return res.status(404).json({ message: 'Booking not found' });
+  }
+
+  return res.json({ message: 'Booking removed', booking: removed });
 });
 
 router.get('/orders', requireAuth, async (req, res) => {

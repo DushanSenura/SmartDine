@@ -7,6 +7,7 @@ import {
   createSpace,
   createStaff,
   createStore,
+  deleteBooking,
   deleteStaff,
   getCurrentUser,
   loadDashboard,
@@ -16,6 +17,7 @@ import {
   requestPayment,
   serveItem,
   updateCurrentUser,
+  updateBooking,
   updateStaff,
   updateStore,
   type DashboardSnapshot,
@@ -53,20 +55,34 @@ const demoCredentials = [
 ];
 
 const hiddenPagesByRole: Partial<Record<DashboardPageId, Array<User['role']>>> = {
-  ordering: ['kitchen'],
-  payment: ['waiter', 'kitchen', 'customer'],
+  dashboard: ['waiter', 'kitchen', 'cashier'],
+  orders: ['kitchen', 'cashier'],
+  ordering: ['kitchen', 'cashier'],
+  payment: ['waiter', 'kitchen', 'cashier', 'customer'],
   kitchen: ['waiter', 'cashier', 'customer'],
-  booking: ['waiter', 'kitchen', 'customer'],
-  spaces: ['waiter', 'kitchen', 'customer'],
-  staff: ['waiter', 'kitchen', 'customer'],
-  branch: ['waiter', 'kitchen', 'customer'],
+  booking: ['waiter', 'kitchen', 'cashier', 'customer'],
+  spaces: ['kitchen', 'customer'],
+  staff: ['waiter', 'kitchen', 'cashier', 'customer'],
+  branch: ['manager', 'waiter', 'kitchen', 'cashier', 'customer'],
   chashiar: ['waiter', 'kitchen', 'customer'],
-  menu: ['waiter', 'kitchen', 'customer'],
-  'company-settings': ['waiter', 'kitchen', 'customer'],
+  menu: ['waiter', 'kitchen', 'cashier', 'customer'],
+  'company-settings': ['manager', 'waiter', 'kitchen', 'cashier', 'customer'],
 };
 
 function pageIsHiddenForRole(pageId: DashboardPageId, role: User['role']) {
   return hiddenPagesByRole[pageId]?.includes(role) ?? false;
+}
+
+function defaultPageForRole(role: User['role']): DashboardPageId {
+  if (role === 'waiter') {
+    return 'orders';
+  }
+
+  if (role === 'kitchen') {
+    return 'kitchen';
+  }
+
+  return role === 'cashier' ? 'chashiar' : 'dashboard';
 }
 
 function App() {
@@ -264,6 +280,51 @@ function App() {
       setMessage(`Booked ${created.space_label} for ${created.customer_name}.`);
     } catch (error) {
       setMessage(error instanceof Error ? error.message : 'Could not create booking');
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleUpdateBooking(bookingId: number, payload: {
+    customer_name: string;
+    customer_email: string;
+    space_kind: string;
+    space_label: string;
+    party_size: number;
+    booking_time: string;
+    notes: string;
+    status: string;
+  }) {
+    if (!token) {
+      setMessage('You must be signed in to edit bookings.');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const updated = await updateBooking(token, bookingId, payload);
+      await openDashboard(token);
+      setMessage(`Updated booking for ${updated.customer_name}.`);
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Could not update booking');
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleDeleteBooking(bookingId: number) {
+    if (!token) {
+      setMessage('You must be signed in to remove bookings.');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const result = await deleteBooking(token, bookingId);
+      await openDashboard(token);
+      setMessage(`Removed booking for ${result.booking.customer_name}.`);
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Could not remove booking');
     } finally {
       setLoading(false);
     }
@@ -508,7 +569,7 @@ function App() {
   }
 
   if (token && user && dashboard) {
-    const visibleActivePage = pageIsHiddenForRole(activePage, user.role) ? 'dashboard' : activePage;
+    const visibleActivePage = pageIsHiddenForRole(activePage, user.role) ? defaultPageForRole(user.role) : activePage;
     const sidebarItems = ([
       { id: 'dashboard', label: 'Dashboard', marker: 'D', detail: 'Company overview' },
       { id: 'orders', label: 'Orders', marker: 'O', detail: `${dashboard.orders.length} total` },
@@ -650,7 +711,10 @@ function App() {
             <BookingPage
               bookings={dashboard.bookings}
               spaces={dashboard.spaces}
+              role={user.role}
               onAddBooking={handleAddBooking}
+              onUpdateBooking={handleUpdateBooking}
+              onDeleteBooking={handleDeleteBooking}
             />
           ) : null}
           {visibleActivePage === 'spaces' ? (
@@ -658,6 +722,7 @@ function App() {
               spaces={dashboard.spaces}
               bookings={dashboard.bookings}
               staff={dashboard.staff}
+              role={user.role}
               onAddSpace={handleAddSpace}
             />
           ) : null}
@@ -683,6 +748,7 @@ function App() {
           {visibleActivePage === 'chashiar' ? (
             <ChashiarPage
               orders={dashboard.orders}
+              role={user.role}
               store={dashboard.store}
               staff={dashboard.staff}
               onCompletePayment={handleCompletePayment}

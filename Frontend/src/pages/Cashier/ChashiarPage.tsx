@@ -1,10 +1,11 @@
-import type { Order, StaffMember, Store } from '../../api';
+import type { Order, Role, StaffMember, Store } from '../../api';
 import { useState } from 'react';
 import './ChashiarPage.css';
 import logoImage from '../../assets/logo.png';
 
 type ChashiarPageProps = {
   orders: Order[];
+  role: Role;
   store?: Store | null;
   staff?: StaffMember[];
   onCompletePayment?: (orderId: number, paymentMethod: string, paymentDetails: { paid_amount: number; change_amount: number }) => Promise<Order>;
@@ -29,7 +30,7 @@ function getSavedPayment(order: Order) {
   return [...(order.history || [])].reverse().find((entry) => entry.status === 'completed' && entry.payment_method);
 }
 
-function ChashiarPage({ orders, store, staff = [], onCompletePayment }: ChashiarPageProps) {
+function ChashiarPage({ orders, role, store, staff = [], onCompletePayment }: ChashiarPageProps) {
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [paymentMethod, setPaymentMethod] = useState(paymentMethods[0].id);
   const [cashAmount, setCashAmount] = useState('');
@@ -62,6 +63,7 @@ function ChashiarPage({ orders, store, staff = [], onCompletePayment }: Chashiar
   const invoicePaymentMethod = selectedSavedPayment?.payment_method || paymentMethod;
   const invoicePaidAmount = selectedSavedPayment?.paid_amount ?? (paymentMethod === 'cash' ? cashValue : Number(selectedOrder?.total || 0));
   const invoiceChangeAmount = selectedSavedPayment?.change_amount ?? (paymentMethod === 'cash' ? Math.max(cashChange, 0) : 0);
+  const showSummaryCards = role !== 'cashier';
 
   const openBill = (order: Order) => {
     const savedPayment = getSavedPayment(order);
@@ -104,12 +106,14 @@ function ChashiarPage({ orders, store, staff = [], onCompletePayment }: Chashiar
         </div>
       </div>
 
-      <div className="chashiar-stats">
-        <article><span>Revenue</span><b>{formatMoney(revenue)}</b></article>
-        <article><span>Bill queue</span><b>{billQueue.length}</b></article>
-        <article><span>Requested</span><b>{requestedBills.length}</b></article>
-        <article><span>Unpaid</span><b>{unpaidOrders.length}</b></article>
-      </div>
+      {showSummaryCards ? (
+        <div className="chashiar-stats">
+          <article><span>Revenue</span><b>{formatMoney(revenue)}</b></article>
+          <article><span>Bill queue</span><b>{billQueue.length}</b></article>
+          <article><span>Requested</span><b>{requestedBills.length}</b></article>
+          <article><span>Unpaid</span><b>{unpaidOrders.length}</b></article>
+        </div>
+      ) : null}
 
       <div className="chashiar-layout">
         <section className="panel">

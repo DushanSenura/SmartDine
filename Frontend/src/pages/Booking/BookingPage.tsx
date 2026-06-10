@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react';
-import type { Booking, Space } from '../../api';
+import type { Booking, Role, Space } from '../../api';
 import './BookingPage.css';
 
 type BookingFormPayload = {
@@ -15,7 +15,10 @@ type BookingFormPayload = {
 type BookingPageProps = {
   bookings: Booking[];
   spaces: Space[];
+  role: Role;
   onAddBooking: (payload: BookingFormPayload) => Promise<void>;
+  onUpdateBooking: (bookingId: number, payload: BookingFormPayload & { status: string }) => Promise<void>;
+  onDeleteBooking: (bookingId: number) => Promise<void>;
 };
 
 function readable(value: string) {
@@ -45,11 +48,24 @@ const initialBookingForm = {
   party_size: 2,
   booking_time: '',
   notes: '',
+  status: 'confirmed',
 };
 
-function BookingPage({ bookings, spaces, onAddBooking }: BookingPageProps) {
+function toDateTimeInputValue(value: string) {
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return value;
+  }
+
+  const offsetDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+  return offsetDate.toISOString().slice(0, 16);
+}
+
+function BookingPage({ bookings, spaces, role, onAddBooking, onUpdateBooking, onDeleteBooking }: BookingPageProps) {
   const [showForm, setShowForm] = useState(false);
   const [bookingForm, setBookingForm] = useState(initialBookingForm);
+  const [editingBookingId, setEditingBookingId] = useState<number | null>(null);
   const sortedBookings = [...bookings].sort((left, right) => (
     new Date(right.booking_time).getTime() - new Date(left.booking_time).getTime()
   ));
@@ -58,6 +74,7 @@ function BookingPage({ bookings, spaces, onAddBooking }: BookingPageProps) {
   const roomBookings = sortedBookings.filter((booking) => booking.space_kind === 'private_room');
   const availableSpaces = spaces.filter((space) => space.kind === bookingForm.space_kind);
   const selectedSpace = availableSpaces.find((space) => space.label === bookingForm.space_label);
+  const canManageBookings = role === 'manager' || role === 'owner';
 
   function openForm() {
     const firstTable = spaces.find((space) => space.kind === 'table');
@@ -71,12 +88,44 @@ function BookingPage({ bookings, spaces, onAddBooking }: BookingPageProps) {
   function closeForm() {
     setShowForm(false);
     setBookingForm(initialBookingForm);
+    setEditingBookingId(null);
+  }
+
+  function openEditForm(booking: Booking) {
+    setBookingForm({
+      customer_name: booking.customer_name,
+      customer_email: booking.customer_email,
+      space_kind: booking.space_kind,
+      space_label: booking.space_label,
+      party_size: booking.party_size,
+      booking_time: toDateTimeInputValue(booking.booking_time),
+      notes: booking.notes,
+      status: booking.status,
+    });
+    setEditingBookingId(booking.id);
+    setShowForm(true);
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    await onAddBooking(bookingForm);
+
+    if (editingBookingId != null) {
+      await onUpdateBooking(editingBookingId, bookingForm);
+    } else {
+      const { status, ...newBooking } = bookingForm;
+      await onAddBooking(newBooking);
+      void status;
+    }
+
     closeForm();
+  }
+
+  async function handleRemoveBooking(booking: Booking) {
+    if (!window.confirm(`Remove booking for ${booking.customer_name}?`)) {
+      return;
+    }
+
+    await onDeleteBooking(booking.id);
   }
 
   return (
@@ -98,7 +147,7 @@ function BookingPage({ bookings, spaces, onAddBooking }: BookingPageProps) {
             <div className="section-title">
               <div>
                 <span>New booking</span>
-                <h2 id="booking-form-title">Add table or private room booking</h2>
+                <h2 id="booking-form-title">{editingBookingId == null ? 'Add table or private room booking' : 'Edit table or private room booking'}</h2>
               </div>
               <button type="button" className="booking-modal-close" onClick={closeForm}>Close</button>
             </div>
@@ -181,7 +230,20 @@ function BookingPage({ bookings, spaces, onAddBooking }: BookingPageProps) {
                   onChange={(event) => setBookingForm((current) => ({ ...current, notes: event.target.value }))}
                 />
               </label>
-              <button type="submit">Create booking</button>
+              {editingBookingId != null ? (
+                <label>
+                  Status
+                  <select
+                    value={bookingForm.status}
+                    onChange={(event) => setBookingForm((current) => ({ ...current, status: event.target.value }))}
+                  >
+                    <option value="confirmed">Confirmed</option>
+                    <option value="pending">Pending</option>
+                    <option value="cancelled">Cancelled</option>
+                  </select>
+                </label>
+              ) : null}
+              <button type="submit">{editingBookingId == null ? 'Create booking' : 'Save booking'}</button>
             </form>
           </section>
         </div>
@@ -195,17 +257,18 @@ function BookingPage({ bookings, spaces, onAddBooking }: BookingPageProps) {
       </div>
 
       <div className="booking-table panel">
-        <div className="booking-table-head">
+        <div className={canManageBookings ? 'booking-table-head with-actions' : 'booking-table-head'}>
           <span>Customer</span>
           <span>Space</span>
           <span>Party</span>
           <span>Time</span>
           <span>Status</span>
+          {canManageBookings ? <span>Actions</span> : null}
         </div>
 
         <div className="booking-table-body">
           {sortedBookings.map((booking) => (
-            <article className="booking-row" key={booking.id}>
+            <article className={canManageBookings ? 'booking-row with-actions' : 'booking-row'} key={booking.id}>
               <div>
                 <strong>{booking.customer_name}</strong>
                 <small>{booking.customer_email}</small>
@@ -217,6 +280,12 @@ function BookingPage({ bookings, spaces, onAddBooking }: BookingPageProps) {
               <strong>{booking.party_size} guests</strong>
               <span className="booking-time">{formatBookingTime(booking.booking_time)}</span>
               <span className={`booking-pill ${booking.status}`}>{readable(booking.status)}</span>
+              {canManageBookings ? (
+                <div className="booking-actions">
+                  <button type="button" className="secondary" onClick={() => openEditForm(booking)}>Edit</button>
+                  <button type="button" className="secondary danger" onClick={() => void handleRemoveBooking(booking)}>Remove</button>
+                </div>
+              ) : null}
               {booking.notes ? <p className="booking-notes">{booking.notes}</p> : null}
             </article>
           ))}

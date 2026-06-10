@@ -225,6 +225,28 @@ export function createBooking(token: string, payload: {
   }, token);
 }
 
+export function updateBooking(token: string, bookingId: number, payload: {
+  customer_name: string;
+  customer_email: string;
+  space_kind: string;
+  space_label: string;
+  party_size: number;
+  booking_time: string;
+  notes: string;
+  status: string;
+}) {
+  return request<Booking>(`/bookings/${bookingId}`, {
+    method: 'PATCH',
+    body: JSON.stringify(payload),
+  }, token);
+}
+
+export function deleteBooking(token: string, bookingId: number) {
+  return request<{ message: string; booking: Booking }>(`/bookings/${bookingId}`, {
+    method: 'DELETE',
+  }, token);
+}
+
 export function createStore(token: string, payload: { name: string; location: string; description: string; manager: string; status?: string }) {
   return request<Store>('/stores', {
     method: 'POST',

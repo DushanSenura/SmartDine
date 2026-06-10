@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react';
-import type { Booking, Space, StaffMember } from '../../api';
+import type { Booking, Role, Space, StaffMember } from '../../api';
 import './TableRoomsPage.css';
 
 type SpaceFormPayload = {
@@ -15,6 +15,7 @@ type TableRoomsPageProps = {
   spaces: Space[];
   bookings: Booking[];
   staff: StaffMember[];
+  role: Role;
   onAddSpace: (payload: SpaceFormPayload) => Promise<void>;
 };
 
@@ -28,6 +29,10 @@ function slugify(value: string) {
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-|-$/g, '');
+}
+
+function normalizeLabel(value: string) {
+  return value.trim().toLowerCase();
 }
 
 const initialSpaceForm = {
@@ -59,22 +64,25 @@ function formatDateTime(value: string) {
   }).format(date);
 }
 
-function TableRoomsPage({ spaces, bookings, staff, onAddSpace }: TableRoomsPageProps) {
+function TableRoomsPage({ spaces, bookings, staff, role, onAddSpace }: TableRoomsPageProps) {
   const [showForm, setShowForm] = useState(false);
   const [spaceForm, setSpaceForm] = useState(initialSpaceForm);
   const [selectedTime, setSelectedTime] = useState(() => toDateTimeInputValue());
+  const [searchedTime, setSearchedTime] = useState(selectedTime);
   const [selectedSpace, setSelectedSpace] = useState<Space | null>(null);
   const tables = spaces.filter((space) => space.kind === 'table');
   const privateRooms = spaces.filter((space) => space.kind === 'private_room');
   const totalCapacity = spaces.reduce((sum, space) => sum + Number(space.capacity), 0);
   const serviceStaff = staff.filter((member) => ['waiter', 'manager', 'owner'].includes(member.role));
   const visibleSpaces = [...tables, ...privateRooms];
-  const selectedTimestamp = new Date(selectedTime).getTime();
+  const searchedTimestamp = new Date(searchedTime).getTime();
+  const canAddSpaces = role === 'manager' || role === 'owner';
 
   function bookingCountFor(space: Space) {
     return bookings.filter((booking) => (
       booking.status !== 'cancelled'
-      && booking.space_label === space.label
+      && booking.space_kind === space.kind
+      && normalizeLabel(booking.space_label) === normalizeLabel(space.label)
     )).length;
   }
 
@@ -83,7 +91,7 @@ function TableRoomsPage({ spaces, bookings, staff, onAddSpace }: TableRoomsPageP
   }
 
   function bookingsAtSelectedTime(space: Space) {
-    if (Number.isNaN(selectedTimestamp)) {
+    if (Number.isNaN(searchedTimestamp)) {
       return [];
     }
 
@@ -92,9 +100,10 @@ function TableRoomsPage({ spaces, bookings, staff, onAddSpace }: TableRoomsPageP
       const bookingTimestamp = new Date(booking.booking_time).getTime();
 
       return booking.status !== 'cancelled'
-        && booking.space_label === space.label
+        && booking.space_kind === space.kind
+        && normalizeLabel(booking.space_label) === normalizeLabel(space.label)
         && !Number.isNaN(bookingTimestamp)
-        && Math.abs(bookingTimestamp - selectedTimestamp) < twoHours;
+        && Math.abs(bookingTimestamp - searchedTimestamp) < twoHours;
     });
   }
 
@@ -139,6 +148,12 @@ function TableRoomsPage({ spaces, bookings, staff, onAddSpace }: TableRoomsPageP
     closeForm();
   }
 
+  function handleTimeSearch(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setSearchedTime(selectedTime);
+    setSelectedSpace(null);
+  }
+
   return (
     <section className="table-rooms-page">
       <div className="table-rooms-hero panel">
@@ -147,12 +162,14 @@ function TableRoomsPage({ spaces, bookings, staff, onAddSpace }: TableRoomsPageP
           <h2>Dining space management</h2>
           <p>Review every table and private room, capacity, QR code token, service assignment, and active booking load.</p>
         </div>
-        <button type="button" onClick={showForm ? closeForm : openForm}>
-          {showForm ? 'Close form' : 'Add table / room'}
-        </button>
+        {canAddSpaces ? (
+          <button type="button" onClick={showForm ? closeForm : openForm}>
+            {showForm ? 'Close form' : 'Add table / room'}
+          </button>
+        ) : null}
       </div>
 
-      {showForm ? (
+      {showForm && canAddSpaces ? (
         <div className="space-modal-backdrop" role="presentation">
           <section className="space-modal panel" role="dialog" aria-modal="true" aria-labelledby="space-form-title">
             <div className="section-title">
@@ -255,7 +272,7 @@ function TableRoomsPage({ spaces, bookings, staff, onAddSpace }: TableRoomsPageP
               <article><span>Type</span><b>{readable(selectedSpace.kind)}</b></article>
               <article><span>Capacity</span><b>{selectedSpace.capacity} seats</b></article>
               <article><span>Status</span><b>{readable(selectedSpaceStatus)}</b></article>
-              <article><span>Selected time</span><b>{formatDateTime(selectedTime)}</b></article>
+              <article><span>Selected time</span><b>{formatDateTime(searchedTime)}</b></article>
               <article><span>Waiter</span><b>{selectedSpace.assigned_waiter}</b></article>
               <article><span>QR token</span><b>{selectedSpace.qr_token}</b></article>
             </div>
@@ -302,17 +319,18 @@ function TableRoomsPage({ spaces, bookings, staff, onAddSpace }: TableRoomsPageP
             <span>Dining room</span>
             <h2>Live table map</h2>
           </div>
-          <div className="live-map-controls">
+          <form className="live-map-controls" onSubmit={(event) => handleTimeSearch(event)}>
             <label>
-              Select time
+              Search date and time
               <input
                 type="datetime-local"
                 value={selectedTime}
                 onChange={(event) => setSelectedTime(event.target.value)}
               />
             </label>
+            <button type="submit">Search</button>
             <strong>{openSeats} seats open</strong>
-          </div>
+          </form>
         </div>
 
         <div className="status-legend" aria-label="Space status legend">
