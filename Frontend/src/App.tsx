@@ -388,7 +388,7 @@ function App() {
       }
 
       await openDashboard(token);
-      setMessage(`Order #${orderId} served and sent to cashier.`);
+      setMessage(`Order #${orderId} service completed and sent to cashier.`);
     } catch (error) {
       setMessage(error instanceof Error ? error.message : 'Could not serve order');
     } finally {

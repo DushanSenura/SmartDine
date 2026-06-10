@@ -81,7 +81,7 @@ function OrderPage({ orders, role, loading, onApproveOrder, onServeOrder, onRequ
       <div className="order-stats">
         <article><span>Total</span><b>{sortedOrders.length}</b></article>
         <article><span>Pending</span><b>{pendingOrders.length}</b></article>
-        <article><span>Ready</span><b>{readyOrders.length}</b></article>
+        <article><span>Ready for service</span><b>{readyOrders.length}</b></article>
         <article><span>Completed</span><b>{completedOrders.length}</b></article>
       </div>
 
@@ -215,7 +215,7 @@ function OrderPage({ orders, role, loading, onApproveOrder, onServeOrder, onRequ
                   onClick={() => void handleServeSelectedOrder()}
                   disabled={!canHandleService || loading}
                 >
-                  {loading ? 'Serving...' : 'Mark Served'}
+                  {loading ? 'Approving...' : 'Approve Service Completed'}
                 </button>
               ) : null}
               {selectedOrder.status === 'served' ? (
